@@ -7,11 +7,19 @@ import (
 )
 
 func main() {
-	fileServer := http.FileServer(http.Dir("./src/web"))
-	http.Handle("/", fileServer)
+	mux := http.NewServeMux()
+	buildHandler := http.FileServer(http.Dir("web/build"))
+	mux.Handle("/", buildHandler)
 
-	fmt.Printf("starting server on :8080")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		log.Fatal(err);
+	server := &http.Server{
+		Handler: mux,
+		Addr: "0.0.0.0:8000",
 	}
+	
+	fmt.Print("Server Started on 8000")
+	log.Fatal(server.ListenAndServe())
+}
+
+func index(writer http.ResponseWriter, request *http.Request) {
+	http.ServeFile(writer, request, "/web/build/index.html")
 }
