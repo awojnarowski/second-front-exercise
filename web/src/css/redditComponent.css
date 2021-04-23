@@ -1,10 +1,5 @@
 .reddit-post {
     width: 50%;
-    min-height: 100vh;
-    margin: 0 auto;
-    color: #ffb04d
-}
-
-body {
-    background-color: #282c34;
+    margin-right: 0;
+    margin-left: 25%;
 }

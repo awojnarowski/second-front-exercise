@@ -2,31 +2,31 @@
  * Container for stock ticker
  * Component will query reddits API
  */
- import './css/redditComponent.css';
+ import './css/stockTickerComponent.css';
  import React, { useState, useEffect } from 'react';
- function RedditPostComponent(props) {
+ function StockTickerComponent(props) {
  
-     const [results, redditPosts] = useState([]);
+     const [price, redditPosts] = useState([]);
  
      useEffect(() => {
          async function fetchData() {
-             const response = await fetch('http://www.reddit.com/search.json?q=AAPL+subreddit:stocks+sort=new');
-             const results = await response.json();
-             const postTitles = results.data.children.map(post => post.data.title);
- 
-             redditPosts(postTitles);
+             //TODO: Secure API key
+            const response = await fetch('https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=AAPL&apikey=TUSEDLP72TPRBL62');
+            const result = await response.json();
+            //Alpha Advantage guarantees price will be in this format
+            redditPosts(result['Global Quote']["05. price"]);
          }
          fetchData();
      }, [props.id]);
  
      return (
-         <div className="reddit-post">
+         <div className="stock-ticker">
              <header>
-                 <p>Reddit Posts!</p>
-                 {results.map(result => <div> {result} </div>)}
+                 <p>AAPL Price!</p>
+                 <div>{price}</div>
              </header>
          </div>
      );
  }
  
- export default RedditPostComponent;
+ export default StockTickerComponent;
