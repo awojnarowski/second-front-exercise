@@ -5,26 +5,31 @@
  import './css/stockTickerComponent.css';
  import React, { useState, useEffect } from 'react';
  function StockTickerComponent(props) {
- 
-     const [price, redditPosts] = useState([]);
+    const { ticker } = props
+     const [prices, stockPricing] = useState();
  
      useEffect(() => {
          async function fetchData() {
              //TODO: Secure API key
-            const response = await fetch('https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=AAPL&apikey=TUSEDLP72TPRBL62');
+            const response = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=TUSEDLP72TPRBL62`);
             const result = await response.json();
-            //Alpha Advantage guarantees price will be in this format
-            redditPosts(result['Global Quote']["05. price"]);
+            //Alpha Advantage guarantees price will be in this format, global quote will be empty if the ticker doesn't exist
+            if (Object.keys(result["Global Quote"]).length > 0) {
+                stockPricing(result['Global Quote']);
+            }
+            else {
+                stockPricing({error: "Sorry, we coudln't find your ticker!"});
+            }
          }
          fetchData();
-     }, [props.id]);
+     }, [ticker]);
  
      return (
          <div className="stock-ticker">
              <header>
-                 <p>AAPL Price!</p>
-                 <div>{price}</div>
+                 <h4>{props.ticker}</h4>
              </header>
+             <div>{Object.entries(prices).map(([key, value]) => { return (<p>{key} : {value}</p>);}) }</div>
          </div>
      );
  }
