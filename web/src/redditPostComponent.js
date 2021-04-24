@@ -12,7 +12,13 @@ function RedditPostComponent(props) {
         async function fetchData() {
             const response = await fetch(`http://www.reddit.com/search.json?q=${ticker}+subreddit:stocks+sort=new`);
             const results = await response.json();
-            const postTitles = results.data.children.map(post => post.data.title);
+            const postTitles = results.data.children.map(post => {
+                return {
+                    title: post.data.title,
+                    name: post.data.name,
+                    url: post.data.url
+                }
+            });
 
             redditPosts(postTitles);
         }
@@ -22,9 +28,10 @@ function RedditPostComponent(props) {
     return (
         <div className="reddit-post">
             <header>
-                <p>What's r/stocks saying about {ticker}?</p>
-                {results.map(result => <div> {result} </div>)}
+                <h4>What's r/stocks saying about {ticker}?</h4>
             </header>
+            {results.map(result => <div key={result.name}> <a href={result.url}>{result.title}</a></div>)}
+            
         </div>
     );
 }
