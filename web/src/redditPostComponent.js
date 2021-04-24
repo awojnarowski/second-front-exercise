@@ -27,7 +27,7 @@ function RedditPostComponent(props) {
     useEffect(() => {
         async function fetchData() {
             let url;
-            //if user changes sort methods or tickers throw out the post ID. Or if this is our first time through (paginationData === undefined) get the list without an ID
+            //if user changes sort methods or tickers throw out the post ID.
             if (prevState !== undefined && (prevState.sortMethod !== sortMethod || prevState.ticker !== ticker)) {
                 url = `http://www.reddit.com/search.json?q=${ticker}&subreddit=stocks&sort=${sortMethod}&t=all&`;
             } else {
@@ -68,6 +68,15 @@ function RedditPostComponent(props) {
             {posts.map(post => <div data-key={post.name} key={post.name}> <a href={post.url}>{post.title}</a></div>)}
         </div>
     );
+
+    //helper hook to track if any states change we need to remove the post ID
+    function usePrevious(value) {
+        const ref = useRef();
+        useEffect(() => {
+        ref.current = value;
+        });
+        return ref.current;
+    }
 }
 
 function SortDropdown(props) {
@@ -123,6 +132,7 @@ function SortDropdown(props) {
     const classes = buttonStyles();
 
     const handleClick = (event) => {
+        //to paginate we want to 
         const posts = document.querySelectorAll('div[data-key]');
         let newID;
         if (event === 'before') {
@@ -147,12 +157,4 @@ function SortDropdown(props) {
  }
 
 
-//helper hook to track if any states change we need to remove the post ID
-function usePrevious(value) {
-    const ref = useRef();
-    useEffect(() => {
-      ref.current = value;
-    });
-    return ref.current;
-}
 export default RedditPostComponent;
