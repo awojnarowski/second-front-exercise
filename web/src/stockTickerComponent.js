@@ -6,7 +6,7 @@
  import React, { useState, useEffect } from 'react';
  function StockTickerComponent(props) {
     const { ticker } = props
-     const [prices, stockPricing] = useState();
+     const [prices, stockPricing] = useState({});
  
      useEffect(() => {
          async function fetchData() {
@@ -14,7 +14,7 @@
             const response = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=TUSEDLP72TPRBL62`);
             const result = await response.json();
             //Alpha Advantage guarantees price will be in this format, global quote will be empty if the ticker doesn't exist
-            if (Object.keys(result["Global Quote"]).length > 0) {
+            if (!result.hasOwnProperty('Error Message') && Object.keys(result["Global Quote"]).length > 0) {
                 stockPricing(result['Global Quote']);
             }
             else {
@@ -29,7 +29,7 @@
              <header>
                  <h4>{props.ticker}</h4>
              </header>
-             <div>{Object.entries(prices).map(([key, value]) => { return (<p>{key} : {value}</p>);}) }</div>
+             {Object.entries(prices).map(([key, value]) => { return (<p key={key}>{key} : {value}</p>);}) }
          </div>
      );
  }
