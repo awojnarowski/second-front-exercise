@@ -25,10 +25,19 @@ First connect to the container with `docker exec -it web bash`
 Then you can build
 ```
 cd web
+npm install
 yarn build
 ```
 
 ## Building The Project Without Docker
-Note, this process assumes you have yarn installed on your local system. From the web directory simply run `yarn build`.
+Note, this process assumes you have yarn installed on your local system. From the web directory simply run 
+```
+npm install
+yarn build
+```
+
+
+NOTE: `npm install` only needs to be ran the first time the container is started or if any changes are made to the `package.json` file in the web directory. Otherwise only a `yarn build` is required for changes to propogate to the container.
+
 
 And that's it! The app should now be running on `localhost:8000` and ready for use.
