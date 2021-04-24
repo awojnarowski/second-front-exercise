@@ -4,6 +4,22 @@
  */
 import './css/redditComponent.css';
 import React, { useState, useEffect, useRef} from 'react';
+import Button from '@material-ui/core/Button';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
+import { makeStyles } from '@material-ui/core/styles';
+import FormControl from '@material-ui/core/FormControl';
+
+const useStyles = makeStyles({
+    root: {
+        color: '#ffb04d',
+    },
+    icon: {
+        fill: '#ffb04d',
+    },
+});
+
 function RedditPostComponent(props) {
     const { ticker } = props;
     const [{posts, sortMethod, postID}, redditPosts] = useState({posts: [], sortMethod: "new", postID: ""});
@@ -12,9 +28,9 @@ function RedditPostComponent(props) {
         async function fetchData() {
             let url;
             if (prevState !== undefined && (prevState.sortMethod !== sortMethod || prevState.ticker !== ticker)) {
-                url = `http://www.reddit.com/search.json?q=${ticker}&subreddit:stocks&sort=${sortMethod}&t=all&`;
+                url = `http://www.reddit.com/search.json?q=${ticker}&subreddit=stocks&sort=${sortMethod}&t=all&`;
             } else {
-                url = `http://www.reddit.com/search.json?q=${ticker}&subreddit:stocks&sort=${sortMethod}&t=all&after=${postID}`;
+                url = `http://www.reddit.com/search.json?q=${ticker}&subreddit=stocks&sort=${sortMethod}&t=all&after=${postID}`;
             }
 
             const response = await fetch(url);
@@ -42,9 +58,11 @@ function RedditPostComponent(props) {
     return (
         <div className="reddit-post">
             <header>
-                <h4>What's r/stocks saying about {ticker}?</h4> 
-                <SortDropdown renderParentCallback={renderParentCallback}></SortDropdown>
-                <Pagination getNewPosts={getNewPosts}></Pagination>
+                <h4>What's reddit saying about {ticker}?</h4>
+                <div className="parent">
+                    <SortDropdown renderParentCallback={renderParentCallback}></SortDropdown>
+                    <Pagination getNewPosts={getNewPosts}></Pagination>
+                </div>
             </header>
             {posts.map(post => <div data-key={post.name} key={post.name}> <a href={post.url}>{post.title}</a></div>)}
         </div>
@@ -53,7 +71,6 @@ function RedditPostComponent(props) {
 
 function SortDropdown(props) {
     const [sortMethod, dropdownState] = useState('new');
-
     const handleChange = (event) => {
         dropdownState(event.target.value);
         props.renderParentCallback(event.target.value);
@@ -62,24 +79,47 @@ function SortDropdown(props) {
     const handleSubmit = (event) => {
         event.preventDefault();
     }
-      
+
+    const classes = useStyles();
+
     return (
-        <form onSubmit={handleSubmit}>
-        <label>
-          Sort:
-          <select value={sortMethod} onChange={handleChange}>
-            <option value="relevance">Relevance</option>
-            <option value="hot">Hot</option>
-            <option value="top">Top</option>
-            <option value="new">New</option>
-          </select>
-        </label>
-      </form>        
+        <FormControl onSubmit={handleSubmit}>
+            <InputLabel classes={{root: classes.root}}>
+            Sort:
+            </InputLabel>
+            <Select 
+                style={{minWidth: 120,}} 
+                inputProps={
+                    {
+                        classes: {
+                            icon: classes.icon,
+                            },
+                        }
+                    }
+                classes={{root: classes.root}} 
+                value={sortMethod} color="primary"
+                onChange={handleChange}>
+
+                <MenuItem value="relevance">Relevance</MenuItem>
+                <MenuItem value="hot">Hot</MenuItem>
+                <MenuItem value="top">Top</MenuItem>
+                <MenuItem value="new">New</MenuItem>
+            </Select>
+        </FormControl>        
     )
  }
 
  function Pagination(props) {
     const [postID, updatedPostID] = useState();
+    const buttonStyles = makeStyles({
+        root: {
+           marginLeft: '5px',
+           backgroundColor: '#4a4540',
+           color: '#ffb04d',
+        }
+    });
+
+    const classes = buttonStyles();
 
     const handleClick = (event) => {
         const posts = document.querySelectorAll('div[data-key]');
@@ -100,8 +140,8 @@ function SortDropdown(props) {
       
     return (
         <form onSubmit={handleSubmit}>
-        <button onClick={() => handleClick('previous')}>Previous</button>
-        <button onClick={() => handleClick('next')}>Next</button>
+        <Button classes={classes} variant="contained" size="small" color="primary" onClick={() => handleClick('previous')}>Previous</Button>
+        <Button classes={classes} variant="contained" size="small" color="primary" onClick={() => handleClick('next')}>Next</Button>
       </form>        
     )   
  }
