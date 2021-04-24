@@ -22,15 +22,16 @@ const useStyles = makeStyles({
 
 function RedditPostComponent(props) {
     const { ticker } = props;
-    const [{posts, sortMethod, postID}, redditPosts] = useState({posts: [], sortMethod: "new", postID: ""});
+    const [{posts, sortMethod, postID, paginationData}, redditPosts] = useState({posts: [], sortMethod: "new", paginationData: {directon: '', postID: '0'}});
     const prevState = usePrevious({ticker, sortMethod});
     useEffect(() => {
         async function fetchData() {
             let url;
+            //if user changes sort methods or tickers throw out the post ID. Or if this is our first time through (paginationData === undefined) get the list without an ID
             if (prevState !== undefined && (prevState.sortMethod !== sortMethod || prevState.ticker !== ticker)) {
                 url = `http://www.reddit.com/search.json?q=${ticker}&subreddit=stocks&sort=${sortMethod}&t=all&`;
             } else {
-                url = `http://www.reddit.com/search.json?q=${ticker}&subreddit=stocks&sort=${sortMethod}&t=all&after=${postID}`;
+                url = `http://www.reddit.com/search.json?q=${ticker}&subreddit=stocks&sort=${sortMethod}&t=all&${paginationData.direction || ''}=${paginationData.postID || ''}`;
             }
 
             const response = await fetch(url);
@@ -43,17 +44,17 @@ function RedditPostComponent(props) {
                 }
             });
 
-            redditPosts({posts: postsFromResponse, sortMethod: sortMethod, postID: postID});
+            redditPosts({posts: postsFromResponse, sortMethod: sortMethod, paginationData: paginationData});
         }
         fetchData();
-    }, [ticker, sortMethod, postID]);
+    }, [ticker, sortMethod, paginationData]);
 
     const renderParentCallback = (sortMethod) => {
-        redditPosts({posts:posts, sortMethod: sortMethod, postID: postID})
+        redditPosts({posts:posts, sortMethod: sortMethod, postID: postID});
     }
 
-    const getNewPosts = (postID) => {
-        redditPosts({posts:posts, sortMethod: sortMethod, postID: postID})
+    const getNewPosts = (paginationData) => {
+        redditPosts({posts:posts, sortMethod: sortMethod, paginationData: paginationData});
     }
     return (
         <div className="reddit-post">
@@ -110,7 +111,7 @@ function SortDropdown(props) {
  }
 
  function Pagination(props) {
-    const [postID, updatedPostID] = useState();
+    const [firstID, updatedPostID] = useState();
     const buttonStyles = makeStyles({
         root: {
            marginLeft: '5px',
@@ -124,14 +125,13 @@ function SortDropdown(props) {
     const handleClick = (event) => {
         const posts = document.querySelectorAll('div[data-key]');
         let newID;
-        if (event === 'previous') {
+        if (event === 'before') {
             newID = posts[0].getAttribute('data-key');
         } else {
             newID = posts[posts.length -1].getAttribute('data-key');
         }
-
         updatedPostID(newID);
-        props.getNewPosts(newID);
+        props.getNewPosts({direction: event, postID: newID});
     }
     
     const handleSubmit = (event) => {
@@ -140,8 +140,8 @@ function SortDropdown(props) {
       
     return (
         <form onSubmit={handleSubmit}>
-        <Button classes={classes} variant="contained" size="small" color="primary" onClick={() => handleClick('previous')}>Previous</Button>
-        <Button classes={classes} variant="contained" size="small" color="primary" onClick={() => handleClick('next')}>Next</Button>
+        <Button classes={classes} variant="contained" size="small" color="primary" onClick={() => handleClick('before')}>Previous</Button>
+        <Button classes={classes} variant="contained" size="small" color="primary" onClick={() => handleClick('after')}>Next</Button>
       </form>        
     )   
  }
